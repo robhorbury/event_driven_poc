@@ -2,14 +2,23 @@ package listener
 
 import (
 	"bufio"
+
+	"example.com/event_driven_poc/events"
+
 	"os"
+	"strings"
 )
 
-func Listener(events chan<- string) {
+func Listener(eventsChannel chan<- string, exit chan<- string) {
 	for {
 		var reader = bufio.NewReader(os.Stdin)
 		message, _ := reader.ReadString('\n')
+		_, err := events.DecodeEvent(message)
 
-		events <- message
+		if strings.TrimSpace(message) == "exit" {
+			exit <- message
+		} else if err == nil {
+			eventsChannel <- message
+		}
 	}
 }
